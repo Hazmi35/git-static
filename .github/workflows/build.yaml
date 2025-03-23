@@ -36,7 +36,9 @@ jobs:
         uses: docker/metadata-action@v5.7.0
         id: meta
         with:
-          images: ghcr.io/${{ github.repository_owner }}/${{ github.repository }}
+          images: |
+            docker.io/${{ github.repository_owner }}/${{ github.repository }}
+            ghcr.io/${{ github.repository_owner }}/${{ github.repository }}
           tags: |
             ${{ steps.git.outputs.MAJOR }}
             ${{ steps.git.outputs.MAJOR }}.${{ steps.git.outputs.MINOR }}
@@ -44,6 +46,17 @@ jobs:
 
             type=sha,prefix=${{ steps.git.outputs.MAJOR }}-,suffix=,format=short
             type=sha,prefix=${{ steps.git.outputs.MAJOR }}-,suffix=,format=long
+            type=sha,prefix=${{ steps.git.outputs.MAJOR }}.${{ steps.git.outputs.MINOR }}-,suffix=,format=short
+            type=sha,prefix=${{ steps.git.outputs.MAJOR }}.${{ steps.git.outputs.MINOR }}-,suffix=,format=long
+            type=sha,prefix=${{ steps.git.outputs.MAJOR }}.${{ steps.git.outputs.MINOR }}.${{ steps.git.outputs.PATCH }}-,suffix=,format=short
+            type=sha,prefix=${{ steps.git.outputs.MAJOR }}.${{ steps.git.outputs.MINOR }}.${{ steps.git.outputs.PATCH }}-,suffix=,format=long
+
+      - name: Login to Docker Hub
+        if: ${{ github.event_name != 'pull_request' }}
+        uses: docker/login-action@v2.0.0
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Login to GitHub Container Registry
         if: ${{ github.event_name != 'pull_request' }}
@@ -68,6 +81,6 @@ jobs:
             linux/ppc64le
             linux/riscv64
             linux/s390x
-          push: false
+          push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
