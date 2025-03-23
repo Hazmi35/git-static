@@ -20,6 +20,7 @@ WORKDIR /build
 # Set optimization flags
 ENV CFLAGS="-static -Os -flto -fomit-frame-pointer -fdata-sections -ffunction-sections"
 ENV LDFLAGS="-static -flto -Wl,--gc-sections"
+ENV NO_GETTEXT=1
 
 # Download, compile, and install Git
 RUN wget https://github.com/git/git/archive/refs/tags/v${GIT_VERSION}.tar.gz && \
@@ -29,8 +30,6 @@ RUN wget https://github.com/git/git/archive/refs/tags/v${GIT_VERSION}.tar.gz && 
     ./configure \
         --prefix=/usr/local \
         --without-tcltk \
-        --without-gettext \
-        --without-svn \
     && make -j$(nproc) all \
     && strip --strip-all git \
     && make install
