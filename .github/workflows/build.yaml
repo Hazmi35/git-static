@@ -1,19 +1,9 @@
 name: Stage platform image build
 
 on:
-  workflow_call:
-    inputs:
-      runs-on:
-        # https://github.com/orgs/community/discussions/26801
-        description: 'Type of machine of job to run on. Needs to be quoted, because to support self-hosted labels and inputs does not support Array nor multiple types (default: "ubuntu-latest")'
-        type: string
-        default: '"ubuntu-latest"'
-        required: false
-      platforms:
-        description: 'Platforms to build the image for. In JSON format. (default: ["linux/amd64"])'
-        type: string
-        default: 'linux/amd64'
-        required: false
+  push:
+    branches:
+      - master
 
 permissions:
   contents: read
