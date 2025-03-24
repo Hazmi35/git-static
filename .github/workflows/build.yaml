@@ -167,7 +167,7 @@ jobs:
           tags: |
             ${{ needs.build.outputs.major }}
             ${{ needs.build.outputs.major }}.${{ needs.build.outputs.minor }}
-            ${{ needs.build.outputs.major }}.${{ needs.build.outputs.minor }}.${{ needs.build.outputs.minor }}
+            ${{ needs.build.outputs.major }}.${{ needs.build.outputs.minor }}.${{ needs.build.outputs.patch }}
 
             type=sha,prefix=${{ needs.build.outputs.major }}-,suffix=,format=short
             type=sha,prefix=${{ needs.build.outputs.major }}-,suffix=,format=long
