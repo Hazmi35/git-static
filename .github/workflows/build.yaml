@@ -32,6 +32,14 @@ jobs:
             runs-on: ubuntu-24.04-arm
           - platform: linux/arm64
             runs-on: ubuntu-24.04-arm
+          # RISC-V platforms
+          - platform: linux/riscv64
+            runs-on: ubuntu-24.04
+          # IBM platforms
+          - platform: linux/s390x
+            runs-on: ubuntu-24.04
+          - platform: linux/ppc64le
+            runs-on: ubuntu-24.04
     runs-on: ${{ matrix.runs-on }}
 
     steps:
@@ -173,10 +181,7 @@ jobs:
         run: |
           docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
             $(printf '${{ steps.repo.outputs.name }}@sha256:%s ' *)
-          docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
-            $(printf '${{ steps.repo.outputs.name }}@sha256:%s ' *)
 
       - name: Inspect image
         run: |
-          docker buildx imagetools inspect ${{ steps.repo.outputs.name }}:${{ steps.meta.outputs.version }}
           docker buildx imagetools inspect ${{ steps.repo.outputs.name }}:${{ steps.meta.outputs.version }}
