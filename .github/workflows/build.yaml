@@ -162,6 +162,7 @@ jobs:
         with:
           images: |
             ghcr.io/${{ steps.repo.outputs.name }}
+            docker.io/${{ steps.repo.outputs.name }}
           tags: |
             ${{ needs.build.outputs.major }}
             ${{ needs.build.outputs.major }}.${{ needs.build.outputs.minor }}
