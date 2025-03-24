@@ -69,6 +69,7 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: |
+            docker.io/${{ steps.repo.outputs.name }}
             ghcr.io/${{ steps.repo.outputs.name }}
 
       - name: Login to Docker Hub
@@ -92,7 +93,7 @@ jobs:
         with:
           platforms: ${{ matrix.platform }}
           labels: ${{ steps.meta.outputs.labels }}
-          outputs: type=image,"name=ghcr.io/${{ steps.repo.outputs.name }}",push-by-digest=true,name-canonical=true,push=true
+          outputs: type=image,"name=ghcr.io/${{ steps.repo.outputs.name }},docker.io/${{ steps.repo.outputs.name }}",push-by-digest=true,name-canonical=true,push=true
 
       - name: Export digest
         run: |
