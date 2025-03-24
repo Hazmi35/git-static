@@ -1,0 +1,37 @@
+name: Build & Push OCI Image to OCI Image Registry
+
+on:
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  x86:
+    uses: ./.github/workflows/build.yaml
+    with:
+      runs-on: '"ubuntu-latest"'
+      platforms: '["linux/386", "linux/amd64", "linux/amd64/v2", "linux/amd64/v3"]'
+  arm:
+    uses: ./.github/workflows/build.yaml
+    with:
+      runs-on: '"ubuntu-latest-arm"'
+      platforms: '["linux/arm/v6", "linux/arm/v7", "linux/arm64/v8"]'
+  riscv:
+    uses: ./.github/workflows/build.yaml
+    with:
+      runs-on: '"ubuntu-latest"'
+      platforms: '["linux/riscv64"]'
+  ppc:
+    uses: ./.github/workflows/build.yaml
+    with:
+      runs-on: '"ubuntu-latest"'
+      platforms: '["linux/ppc64le"]'
+  s390:
+    uses: ./.github/workflows/build.yaml
+    with:
+      runs-on: '"ubuntu-latest"'
+      platforms: '["linux/s390x"]'

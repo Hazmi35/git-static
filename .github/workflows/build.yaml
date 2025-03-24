@@ -1,9 +1,19 @@
 name: Build & Push OCI Image to OCI Image Registry
 
 on:
-  push:
-    branches:
-      - master
+  workflow_call:
+    inputs:
+      runs-on:
+        # https://github.com/orgs/community/discussions/26801
+        description: 'Type of machine of job to run on. Needs to be quoted, because to support self-hosted labels and inputs does not support Array nor multiple types (default: "ubuntu-latest")'
+        type: string
+        default: '"ubuntu-latest"'
+        required: false
+      platforms:
+        description: 'Platforms to build the image for. In JSON format. (default: ["linux/amd64"])'
+        type: string
+        default: 'linux/amd64'
+        required: false
 
 permissions:
   contents: read
@@ -12,18 +22,10 @@ permissions:
 jobs:
   build:
     environment: default
-    runs-on: ubuntu-latest
+    runs-on: ${{ fromJson(inputs.runs-on) }}
     strategy:
       matrix:
-        platform:
-          - linux/386
-          - linux/amd64
-          - linux/arm/v6
-          - linux/arm/v7
-          - linux/arm64/v8
-          - linux/ppc64le
-          - linux/riscv64
-          - linux/s390x
+        platform: ${{ fromJson(inputs.platforms) }}
 
     steps:
       - name: Check Out Repository
@@ -49,8 +51,8 @@ jobs:
         id: meta
         with:
           images: |
-            docker.io/${{ github.repository_owner }}/${{ github.repository }}
-            ghcr.io/${{ github.repository_owner }}/${{ github.repository }}
+            docker.io/${{ github.repository }}
+            ghcr.io/${{ github.repository }}
           tags: |
             ${{ steps.git.outputs.MAJOR }}
             ${{ steps.git.outputs.MAJOR }}.${{ steps.git.outputs.MINOR }}
