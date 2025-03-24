@@ -9,6 +9,9 @@ permissions:
   contents: read
   packages: write
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+
 jobs:
   x86:
     uses: ./.github/workflows/build.yaml
@@ -48,64 +51,56 @@ jobs:
       - name: Check Out Repository
         uses: actions/checkout@v4.2.2
 
-      # - name: Set up Docker Buildx
-      #   id: buildx
-      #   uses: docker/setup-buildx-action@v3.10.0
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v3.10.0
 
-      # - name: Download digests
-      #   uses: actions/download-artifact@v4.2.1
-      #   with:
-      #     path: ${{ runner.temp }}/digests
-      #     pattern: digests-*
-      #     merge-multiple: true
+      - name: Login to Docker Hub
+        if: ${{ github.event_name != 'pull_request' }}
+        uses: docker/login-action@v3.4.0
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # - name: Login to Docker Hub
-      #   if: ${{ github.event_name != 'pull_request' }}
-      #   uses: docker/login-action@v3.4.0
-      #   with:
-      #     username: ${{ secrets.DOCKER_USERNAME }}
-      #     password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Login to GitHub Container Registry
+        if: ${{ github.event_name != 'pull_request' }}
+        uses: docker/login-action@v3.4.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      # - name: Login to GitHub Container Registry
-      #   if: ${{ github.event_name != 'pull_request' }}
-      #   uses: docker/login-action@v3.4.0
-      #   with:
-      #     registry: ghcr.io
-      #     username: ${{ github.repository_owner }}
-      #     password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Get Git version in Dockerfile
+        id: git
+        run: |
+          export VERSION=$(cat Dockerfile | sed -n 's/.*ARG GIT_VERSION=\([0-9.]*\).*/\1/p')
+          echo "MAJOR=$(echo $VERSION | cut -d. -f1)" >> $GITHUB_OUTPUT
+          echo "MINOR=$(echo $VERSION | cut -d. -f2)" >> $GITHUB_OUTPUT
+          echo "PATCH=$(echo $VERSION | cut -d. -f3)" >> $GITHUB_OUTPUT
 
-      # - name: Get Git version in Dockerfile
-      #   id: git
-      #   run: |
-      #     export VERSION=$(cat Dockerfile | sed -n 's/.*ARG GIT_VERSION=\([0-9.]*\).*/\1/p')
-      #     echo "MAJOR=$(echo $VERSION | cut -d. -f1)" >> $GITHUB_OUTPUT
-      #     echo "MINOR=$(echo $VERSION | cut -d. -f2)" >> $GITHUB_OUTPUT
-      #     echo "PATCH=$(echo $VERSION | cut -d. -f3)" >> $GITHUB_OUTPUT
+      - name: Generate Docker image metadata
+        uses: docker/metadata-action@v5.7.0
+        id: meta
+        with:
+          images: |
+            docker.io/${{ github.repository }}
+            ghcr.io/${{ github.repository }}
+          tags: |
+            ${{ steps.git.outputs.MAJOR }}
+            ${{ steps.git.outputs.MAJOR }}.${{ steps.git.outputs.MINOR }}
+            ${{ steps.git.outputs.MAJOR }}.${{ steps.git.outputs.MINOR }}.${{ steps.git.outputs.PATCH }}
 
-      # - name: Generate Docker image metadata
-      #   uses: docker/metadata-action@v5.7.0
-      #   id: meta
-      #   with:
-      #     images: |
-      #       docker.io/${{ github.repository }}
-      #       ghcr.io/${{ github.repository }}
-      #     tags: |
-      #       ${{ steps.git.outputs.MAJOR }}
-      #       ${{ steps.git.outputs.MAJOR }}.${{ steps.git.outputs.MINOR }}
-      #       ${{ steps.git.outputs.MAJOR }}.${{ steps.git.outputs.MINOR }}.${{ steps.git.outputs.PATCH }}
+            type=sha,prefix=${{ steps.git.outputs.MAJOR }}-,suffix=,format=short
+            type=sha,prefix=${{ steps.git.outputs.MAJOR }}-,suffix=,format=long
+            type=sha,prefix=${{ steps.git.outputs.MAJOR }}.${{ steps.git.outputs.MINOR }}-,suffix=,format=short
+            type=sha,prefix=${{ steps.git.outputs.MAJOR }}.${{ steps.git.outputs.MINOR }}-,suffix=,format=long
+            type=sha,prefix=${{ steps.git.outputs.MAJOR }}.${{ steps.git.outputs.MINOR }}.${{ steps.git.outputs.PATCH }}-,suffix=,format=short
+            type=sha,prefix=${{ steps.git.outputs.MAJOR }}.${{ steps.git.outputs.MINOR }}.${{ steps.git.outputs.PATCH }}-,suffix=,format=long
 
-      #       type=sha,prefix=${{ steps.git.outputs.MAJOR }}-,suffix=,format=short
-      #       type=sha,prefix=${{ steps.git.outputs.MAJOR }}-,suffix=,format=long
-      #       type=sha,prefix=${{ steps.git.outputs.MAJOR }}.${{ steps.git.outputs.MINOR }}-,suffix=,format=short
-      #       type=sha,prefix=${{ steps.git.outputs.MAJOR }}.${{ steps.git.outputs.MINOR }}-,suffix=,format=long
-      #       type=sha,prefix=${{ steps.git.outputs.MAJOR }}.${{ steps.git.outputs.MINOR }}.${{ steps.git.outputs.PATCH }}-,suffix=,format=short
-      #       type=sha,prefix=${{ steps.git.outputs.MAJOR }}.${{ steps.git.outputs.MINOR }}.${{ steps.git.outputs.PATCH }}-,suffix=,format=long
-
-      # - name: List digests
-      #   run: ls -l ${{ runner.temp }}/digests
-
-      # - name: Create manifest list and push
-      #   working-directory: ${{ runner.temp }}/digests
-      #   run: |
-      #     docker buildx imagetools create --dry-run $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
-      #       $(printf 'docker.io/hazmi35/git-static@sha256:%s ' *)
+      - name: Merge images
+        run: |
+          docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
+            ghcr.io/${{ github.repository }}/staging:linux-amd64 \
+            ghcr.io/${{ github.repository }}/staging:linux-386 \
+            ghcr.io/${{ github.repository }}/staging:linux-amd64-v2 \
+            ghcr.io/${{ github.repository }}/staging:linux-amd64-v3
