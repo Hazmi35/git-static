@@ -1,4 +1,4 @@
-name: Stage platform image build
+name: Build and Push OCI container images
 
 on:
   push:
@@ -11,6 +11,7 @@ permissions:
 
 jobs:
   build:
+    environment: default
     strategy:
       fail-fast: false
       matrix:
@@ -114,7 +115,8 @@ jobs:
       patch: ${{ steps.version.outputs.patch }}
 
   merge:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    environment: default
     needs:
       - build
     steps:
