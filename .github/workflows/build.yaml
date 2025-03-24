@@ -37,32 +37,18 @@ jobs:
         id: buildx
         uses: docker/setup-buildx-action@v3.10.0
 
-      - name: Get Git version in Dockerfile
-        id: git
+      - name: Lowercase repository name
+        id: repo
         run: |
-          export VERSION=$(cat Dockerfile | sed -n 's/.*ARG GIT_VERSION=\([0-9.]*\).*/\1/p')
-          echo "MAJOR=$(echo $VERSION | cut -d. -f1)" >> $GITHUB_OUTPUT
-          echo "MINOR=$(echo $VERSION | cut -d. -f2)" >> $GITHUB_OUTPUT
-          echo "PATCH=$(echo $VERSION | cut -d. -f3)" >> $GITHUB_OUTPUT
+          echo "name=${GITHUB_REPOSITORY,,}" >> $GITHUB_OUTPUT
 
       - name: Generate Docker image metadata
         uses: docker/metadata-action@v5.7.0
         id: meta
         with:
-          images: |
-            docker.io/${{ github.repository }}
-            ghcr.io/${{ github.repository }}
           tags: |
-            ${{ steps.git.outputs.MAJOR }}
-            ${{ steps.git.outputs.MAJOR }}.${{ steps.git.outputs.MINOR }}
-            ${{ steps.git.outputs.MAJOR }}.${{ steps.git.outputs.MINOR }}.${{ steps.git.outputs.PATCH }}
-
-            type=sha,prefix=${{ steps.git.outputs.MAJOR }}-,suffix=,format=short
-            type=sha,prefix=${{ steps.git.outputs.MAJOR }}-,suffix=,format=long
-            type=sha,prefix=${{ steps.git.outputs.MAJOR }}.${{ steps.git.outputs.MINOR }}-,suffix=,format=short
-            type=sha,prefix=${{ steps.git.outputs.MAJOR }}.${{ steps.git.outputs.MINOR }}-,suffix=,format=long
-            type=sha,prefix=${{ steps.git.outputs.MAJOR }}.${{ steps.git.outputs.MINOR }}.${{ steps.git.outputs.PATCH }}-,suffix=,format=short
-            type=sha,prefix=${{ steps.git.outputs.MAJOR }}.${{ steps.git.outputs.MINOR }}.${{ steps.git.outputs.PATCH }}-,suffix=,format=long
+            docker.io/${{ steps.repo.outputs.name }}
+            ghcr.io/${{ steps.repo.outputs.name }}
 
       - name: Build and push the Docker image from the specified Dockerfile
         id: build
