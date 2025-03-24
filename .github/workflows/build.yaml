@@ -1,4 +1,4 @@
-name: Build & Push OCI Image to OCI Image Registry
+name: Stage platform image build
 
 on:
   workflow_call:
@@ -37,18 +37,14 @@ jobs:
         id: buildx
         uses: docker/setup-buildx-action@v3.10.0
 
-      - name: Lowercase repository name
-        id: repo
-        run: |
-          echo "name=${GITHUB_REPOSITORY,,}" >> $GITHUB_OUTPUT
-
       - name: Generate Docker image metadata
         uses: docker/metadata-action@v5.7.0
         id: meta
         with:
           images: |
-            docker.io/${{ steps.repo.outputs.name }}
-            ghcr.io/${{ steps.repo.outputs.name }}
+            ghcr.io/${{ github.repository }}-staging
+          tags: |
+            ${{ matrix.platform }}
 
       - name: Build and push the Docker image from the specified Dockerfile
         id: build
@@ -56,21 +52,7 @@ jobs:
         with:
           context: .
           file: ./Dockerfile
+          push: true
           platforms: ${{ matrix.platform }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          outputs: type=image,push-by-digest=true,name-canonical=true,push=true
-
-      - name: Export digest
-        run: |
-          mkdir -p ${{ runner.temp }}/digests
-          digest="${{ steps.build.outputs.digest }}"
-          touch "${{ runner.temp }}/digests/${digest#sha256:}"
-
-      - name: Upload digest
-        uses: actions/upload-artifact@v4.6.2
-        with:
-          name: digests-${{ matrix.platform }}
-          path: ${{ runner.temp }}/digests/*
-          if-no-files-found: error
-          retention-days: 1
