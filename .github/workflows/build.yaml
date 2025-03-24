@@ -46,7 +46,7 @@ jobs:
         uses: docker/metadata-action@v5.7.0
         id: meta
         with:
-          tags: |
+          images: |
             docker.io/${{ steps.repo.outputs.name }}
             ghcr.io/${{ steps.repo.outputs.name }}
 
