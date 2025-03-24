@@ -42,7 +42,7 @@ jobs:
         id: meta
         with:
           images: |
-            ghcr.io/${{ github.repository }}-staging
+            ghcr.io/${{ github.repository }}/staging
           tags: |
             ${{ matrix.platform }}
 
