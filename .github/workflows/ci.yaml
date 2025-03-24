@@ -101,8 +101,11 @@ jobs:
             type=sha,prefix=${{ steps.git.outputs.MAJOR }}.${{ steps.git.outputs.MINOR }}.${{ steps.git.outputs.PATCH }}-,suffix=,format=short
             type=sha,prefix=${{ steps.git.outputs.MAJOR }}.${{ steps.git.outputs.MINOR }}.${{ steps.git.outputs.PATCH }}-,suffix=,format=long
 
+      - name: List digests
+        run: ls -l ${{ runner.temp }}/digests
+
       - name: Create manifest list and push
         working-directory: ${{ runner.temp }}/digests
         run: |
-          docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
+          docker buildx imagetools create --dry-run $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
             $(printf 'docker.io/hazmi35/git-static@sha256:%s ' *)
