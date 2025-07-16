@@ -1,4 +1,4 @@
-FROM mirror.gcr.io/library/alpine:3.22.0 AS build
+FROM mirror.gcr.io/library/alpine:3.22.1 AS build
 
 ARG GIT_VERSION=2.50.0
 
