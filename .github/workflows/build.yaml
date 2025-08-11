@@ -44,7 +44,7 @@ jobs:
 
     steps:
       - name: Check Out Repository
-        uses: actions/checkout@v4.2.2
+        uses: actions/checkout@v4.3.0
 
       - name: Lowercase GitHub repo name
         id: repo
