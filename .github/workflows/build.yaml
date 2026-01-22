@@ -93,6 +93,7 @@ jobs:
         with:
           platforms: ${{ matrix.platform }}
           labels: ${{ steps.meta.outputs.labels }}
+          provenance: false
           outputs: type=image,"name=ghcr.io/${{ steps.repo.outputs.name }},docker.io/${{ steps.repo.outputs.name }}",push-by-digest=true,name-canonical=true,push=true
 
       - name: Export digest
