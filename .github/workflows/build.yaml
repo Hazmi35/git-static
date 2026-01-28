@@ -61,15 +61,15 @@ jobs:
           echo "pair=${platform//\//-}" >> $GITHUB_OUTPUT
 
       - name: Set up QEMU for Docker Buildx
-        uses: docker/setup-qemu-action@v3.7.0
+        uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3.7.0
 
       - name: Set up Docker Buildx
         id: buildx
-        uses: docker/setup-buildx-action@v3.12.0
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
 
       - name: Generate Docker image metadata
         id: meta
-        uses: docker/metadata-action@v5.10.0
+        uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051 # v5.10.0
         with:
           images: |
             docker.io/${{ steps.repo.outputs.name }}
@@ -92,7 +92,7 @@ jobs:
 
       - name: Build and push by digest
         id: build
-        uses: docker/build-push-action@v6.18.0
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
         with:
           platforms: ${{ matrix.platform }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -106,7 +106,7 @@ jobs:
           touch "${{ runner.temp }}/digests/${digest#sha256:}"
 
       - name: Upload digest
-        uses: actions/upload-artifact@v6.0.0
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: digests-${{ steps.platform.outputs.pair }}
           path: ${{ runner.temp }}/digests/*
@@ -132,7 +132,7 @@ jobs:
       - build
     steps:
       - name: Download digests
-        uses: actions/download-artifact@v7.0.0
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           path: ${{ runner.temp }}/digests
           pattern: digests-*
@@ -154,7 +154,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3.12.0
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
 
       - name: Lowercase GitHub repo name
         id: repo
@@ -163,7 +163,7 @@ jobs:
 
       - name: Generate Docker image metadata
         id: meta
-        uses: docker/metadata-action@v5.10.0
+        uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051 # v5.10.0
         with:
           images: |
             ghcr.io/${{ steps.repo.outputs.name }}
