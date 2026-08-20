@@ -6,6 +6,7 @@ ARG GIT_VERSION=2.55.0
 RUN apk add --no-cache \
     wget \
     build-base \
+    cargo \
     autoconf \
     curl-dev \
     expat-dev \
@@ -13,6 +14,7 @@ RUN apk add --no-cache \
     openssl-dev \
     pcre2-dev \
     perl-dev \
+    rust \
     zlib-dev \
     zlib-static
 
