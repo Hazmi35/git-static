@@ -9,6 +9,7 @@ RUN apk add --no-cache \
     autoconf \
     curl-dev \
     expat-dev \
+    linux-headers \
     openssl-dev \
     pcre2-dev \
     perl-dev \
