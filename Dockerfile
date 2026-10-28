@@ -1,6 +1,6 @@
 FROM mirror.gcr.io/library/alpine:3.24.3@sha256:be2656061b536c1883c4034790e21d0a09c5aaaf51968b89368a3c0371ea2c9a AS build
 
-ARG GIT_VERSION=2.55.0
+ARG GIT_VERSION=2.56.0
 
 # Install necessary build dependencies
 RUN apk add --no-cache \
